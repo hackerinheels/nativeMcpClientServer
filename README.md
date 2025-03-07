@@ -42,12 +42,21 @@ This project implements a simple MCP host that can discover and use tools from t
 
 2. Install dependencies:
    ```
-   uv pip install httpx fastapi uvicorn websockets python-dotenv
+   uv pip install httpx fastapi uvicorn websockets python-dotenv requests PyYAML
    ```
 
 3. Configure environment variables:
-   - Create a `.env` file in the project root
-   - Set required variables (see Configuration section)
+   - For the MCP Host:
+     ```
+     cp .env.example .env.host
+     ```
+     Edit `.env.host` and add your Gemini API key if you want to use Gemini
+   
+   - For the Product Server:
+     ```
+     cp product-server/.env.example product-server/.env
+     ```
+     Edit `product-server/.env` if you need to change the product API URL
 
 ## Configuration
 
