@@ -8,7 +8,8 @@ This project implements a simple MCP host that can discover and use tools from t
 
 1. **MCP Host**: A WebSocket server that communicates with clients and tool servers
 2. **Product Server**: A tool server that provides product information via SSE
-3. **MCP Client**: A simple client for interacting with the MCP host
+3. **Analytics Server**: A tool server that provides analytics data via SSE
+4. **MCP Client**: A simple client for interacting with the MCP host
 
 ## Architecture
 
@@ -31,6 +32,7 @@ This project implements a simple MCP host that can discover and use tools from t
 - WebSocket-based client-host communication
 - Support for both Ollama and Gemini LLM backends
 - Environment-based configuration
+- Multiple tool servers (Product and Analytics)
 
 ## Setup
 
@@ -57,6 +59,12 @@ This project implements a simple MCP host that can discover and use tools from t
      cp product-server/.env.example product-server/.env
      ```
      Edit `product-server/.env` if you need to change the product API URL
+     
+   - For the Analytics Server:
+     ```
+     cp analytics-server/.env.example analytics-server/.env
+     ```
+     Edit `analytics-server/.env` if you need to change the analytics API URL
 
 ## Configuration
 
@@ -75,11 +83,20 @@ The system uses environment variables for configuration:
 - `PRODUCT_SERVER_PORT`: Port for the product server (default: 5001)
 - `PRODUCTS_API_URL`: URL for the products API (default: http://localhost:5087/api/products)
 
+### Analytics Server
+- `ANALYTICS_SERVER_HOST`: Host for the analytics server (default: localhost)
+- `ANALYTICS_SERVER_PORT`: Port for the analytics server (default: 5002)
+- `ANALYTICS_API_URL`: URL for the analytics API (default: http://localhost:5088/api/analytics)
+
 ## Running the System
 
-1. Start the product server:
+1. Start the tool servers:
    ```
+   # Start the product server
    python product-server/server_product.py
+   
+   # Start the analytics server (in a separate terminal)
+   python analytics-server/server_analytics.py
    ```
 
 2. Start the MCP host:
@@ -89,7 +106,9 @@ The system uses environment variables for configuration:
 
 3. The MCP client will automatically start if `CLIENT_SCRIPT_PATH` is set.
 
-4. Interact with the system by sending messages like "get products" to the client.
+4. Interact with the system by sending messages like:
+   - "get products" to fetch product data
+   - "show analytics" or "get analytics for last week" to fetch analytics data
 
 ## Tool Servers
 

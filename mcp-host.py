@@ -163,13 +163,23 @@ class MCPHost:
                     logger.error("get_products tool not found")
                     return None
                 
+                # Find the product server URL
+                product_server_url = None
+                for server in tool_servers:
+                    if "product" in server["path"].lower():
+                        product_server_url = server["url"]
+                        break
+                
+                if not product_server_url:
+                    logger.error("Product server URL not found")
+                    return None
+                
                 # Make a request to the tool server
-                server_url = tool_servers[0]["url"]  # Assuming the first server is the product server
-                logger.info(f"Making SSE request to {server_url}/run")
+                logger.info(f"Making SSE request to {product_server_url}/run")
                 
                 # Use httpx for SSE support
                 async with httpx.AsyncClient() as client:
-                    async with client.stream('POST', f"{server_url}/run", json={
+                    async with client.stream('POST', f"{product_server_url}/run", json={
                         "name": "get_products",
                         "parameters": {}
                     }, timeout=30.0) as response:
@@ -222,6 +232,110 @@ class MCPHost:
                             
             except Exception as e:
                 logger.error(f"Error using get_products tool: {str(e)}")
+                import traceback
+                logger.error(traceback.format_exc())
+        
+        # Check for get_analytics tool
+        elif "analytics" in message_lower or "statistics" in message_lower or "metrics" in message_lower:
+            logger.info("Using get_analytics tool")
+            try:
+                # Find the get_analytics tool
+                get_analytics_tool = None
+                for tool in self.available_tools:
+                    if tool.get("name") == "get_analytics":
+                        get_analytics_tool = tool
+                        break
+                
+                if not get_analytics_tool:
+                    logger.error("get_analytics tool not found")
+                    return None
+                
+                # Find the analytics server URL
+                analytics_server_url = None
+                for server in tool_servers:
+                    if "analytics" in server["path"].lower():
+                        analytics_server_url = server["url"]
+                        break
+                
+                if not analytics_server_url:
+                    logger.error("Analytics server URL not found")
+                    return None
+                
+                # Determine the period from the message
+                period = "daily"  # default
+                if "week" in message_lower or "weekly" in message_lower:
+                    period = "weekly"
+                elif "month" in message_lower or "monthly" in message_lower:
+                    period = "monthly"
+                
+                # Make a request to the tool server
+                logger.info(f"Making SSE request to {analytics_server_url}/run for period: {period}")
+                
+                # Use httpx for SSE support
+                async with httpx.AsyncClient() as client:
+                    async with client.stream('POST', f"{analytics_server_url}/run", json={
+                        "name": "get_analytics",
+                        "parameters": {"period": period}
+                    }, timeout=30.0) as response:
+                        if response.status_code == 200:
+                            logger.info("Receiving SSE stream...")
+                            analytics_data = None
+                            
+                            # Process the SSE stream
+                            async for line in response.aiter_lines():
+                                if line.startswith("data: "):
+                                    try:
+                                        data = json.loads(line[6:])
+                                        if "result" in data:
+                                            analytics_data = data["result"]
+                                            logger.info(f"Received analytics data via SSE: {str(analytics_data)[:100]}...")
+                                        elif "error" in data:
+                                            logger.error(f"Error from SSE stream: {data['error']}")
+                                    except json.JSONDecodeError:
+                                        logger.error(f"Failed to parse SSE data: {line}")
+                                elif line.startswith("event: close"):
+                                    logger.info("SSE stream closed by server")
+                                    break
+                            
+                            if analytics_data:
+                                # Format the analytics data into a nice response
+                                period_text = analytics_data.get("period", "daily").capitalize()
+                                response_text = f"Here are the {period_text} analytics metrics:\n\n"
+                                
+                                # Add metrics section
+                                metrics = analytics_data.get("metrics", {})
+                                if metrics:
+                                    response_text += "📊 **Key Metrics**:\n"
+                                    for key, value in metrics.items():
+                                        # Format the key with spaces and title case
+                                        formatted_key = key.replace("_", " ").title()
+                                        response_text += f"- {formatted_key}: {value}\n"
+                                    response_text += "\n"
+                                
+                                # Add top pages section
+                                top_pages = analytics_data.get("top_pages", [])
+                                if top_pages:
+                                    response_text += "📈 **Top Pages**:\n"
+                                    for i, page in enumerate(top_pages, 1):
+                                        response_text += f"{i}. {page.get('url', 'Unknown')}: {page.get('views', 0)} views\n"
+                                    response_text += "\n"
+                                
+                                # Add traffic sources section
+                                traffic_sources = analytics_data.get("traffic_sources", {})
+                                if traffic_sources:
+                                    response_text += "🔍 **Traffic Sources**:\n"
+                                    for source, percentage in traffic_sources.items():
+                                        response_text += f"- {source.title()}: {percentage}%\n"
+                                
+                                logger.info(f"Returning response: {response_text[:100]}...")
+                                return response_text
+                            else:
+                                logger.error("No analytics data received from SSE stream")
+                        else:
+                            logger.error(f"Tool execution failed with status {response.status_code}")
+                            
+            except Exception as e:
+                logger.error(f"Error using get_analytics tool: {str(e)}")
                 import traceback
                 logger.error(traceback.format_exc())
         

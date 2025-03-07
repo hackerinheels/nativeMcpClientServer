@@ -3,6 +3,8 @@
 tool_servers:
   - url: "http://localhost:5001"  # Product Server (MCP interface)
     path: "product-server/server_product.py"  # Path to the server script
+  - url: "http://localhost:5002"  # Analytics Server (MCP interface)
+    path: "analytics-server/server_analytics.py"  # Path to the server script
 
 # Example: To add more tool servers in the future, just add their URLs:
 #  - url: "http://localhost:5002"  # Analytics Server 
