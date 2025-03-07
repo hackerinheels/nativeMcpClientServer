@@ -4,7 +4,7 @@ A native implementation of the MCP (Machine Conversation Protocol) client-server
 
 ## Overview
 
-This project implements a simple MCP host that can discover and use tools from tool servers. It includes:
+This project implements a simple MCP host that can discover and use tools from multiple tool servers. It includes:
 
 1. **MCP Host**: A WebSocket server that communicates with clients and tool servers
 2. **Product Server**: A tool server that provides product information via SSE
@@ -25,6 +25,24 @@ This project implements a simple MCP host that can discover and use tools from t
                                    └──────────────┘
 ```
 
+## Multi-Server Architecture
+
+The system supports multiple tool servers, each providing different functionality:
+
+```
+                                                    ┌─────────────────────┐
+                                                 ┌─>│ Product Server     │
+                                                 │  │ - get_products     │
+                                                 │  └─────────────────────┘
+┌─────────────┐      WebSocket      ┌──────────┐ │
+│  MCP Client │<─────────────────-->│ MCP Host │─┤
+└─────────────┘                     └──────────┘ │
+                                                 │  ┌─────────────────────┐
+                                                 └─>│ Analytics Server    │
+                                                    │ - get_analytics     │
+                                                    └─────────────────────┘
+```
+
 ## Features
 
 - Tool discovery via HTTP endpoints
@@ -33,6 +51,7 @@ This project implements a simple MCP host that can discover and use tools from t
 - Support for both Ollama and Gemini LLM backends
 - Environment-based configuration
 - Multiple tool servers (Product and Analytics)
+- Dynamic tool discovery from all configured servers
 
 ## Setup
 
@@ -88,6 +107,20 @@ The system uses environment variables for configuration:
 - `ANALYTICS_SERVER_PORT`: Port for the analytics server (default: 5002)
 - `ANALYTICS_API_URL`: URL for the analytics API (default: http://localhost:5088/api/analytics)
 
+## Tool Server Configuration
+
+Tool servers are configured in the `config.yaml` file:
+
+```yaml
+tool_servers:
+  - url: "http://localhost:5001"  # Product Server
+    path: "product-server/server_product.py"
+  - url: "http://localhost:5002"  # Analytics Server
+    path: "analytics-server/server_analytics.py"
+```
+
+To add more tool servers, simply add new entries to this list.
+
 ## Running the System
 
 1. Start the tool servers:
@@ -110,12 +143,29 @@ The system uses environment variables for configuration:
    - "get products" to fetch product data
    - "show analytics" or "get analytics for last week" to fetch analytics data
 
+## Available Tools
+
+### Product Server Tools
+- `get_products`: Fetches product information from the configured API
+
+### Analytics Server Tools
+- `get_analytics`: Fetches analytics data with optional period parameter (daily, weekly, monthly)
+
 ## Tool Servers
 
 Tool servers must implement:
 
 1. A `/tools` endpoint that returns a list of available tools
 2. A `/run` endpoint that executes a tool and returns results via SSE
+
+## Adding New Tool Servers
+
+To add a new tool server:
+
+1. Create a new directory for your server (e.g., `new-server/`)
+2. Implement the server with `/tools` and `/run` endpoints
+3. Add the server to `config.yaml`
+4. Update the MCP host's `check_and_use_tools` method to handle the new tools
 
 ## License
 
