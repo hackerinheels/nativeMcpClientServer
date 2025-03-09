@@ -1,0 +1,20 @@
+# Core dependencies
+websockets==12.0
+python-dotenv==1.0.1
+numpy==1.24.3
+httpx
+fastapi
+uvicorn
+
+# Audio processing
+SpeechRecognition==3.10.0
+PyAudio==0.2.13
+
+# Note: On macOS, install portaudio first:
+# brew install portaudio
+#
+# On Ubuntu/Debian:
+# sudo apt-get install python3-pyaudio
+#
+# On Windows:
+# No additional steps required typically 

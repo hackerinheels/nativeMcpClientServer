@@ -6,7 +6,7 @@ import asyncio
 from typing import Any, List, Dict
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import StreamingResponse
 import uvicorn
 
@@ -24,7 +24,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 # Server configuration
 SERVER_HOST = os.getenv("PRODUCT_SERVER_HOST", "localhost")
 SERVER_PORT = int(os.getenv("PRODUCT_SERVER_PORT", "5001"))
-PRODUCTS_API = os.getenv("PRODUCTS_API_URL", "http://localhost:5087/api/products")
+PRODUCTS_API_URL = os.getenv("PRODUCTS_API_URL", "http://localhost:5087/api/products")
 
 # Create FastAPI app
 app = FastAPI(title="Product Server")
@@ -56,8 +56,8 @@ async def sse_generator(tool_name: str, params: Dict[str, Any]):
     if tool_name == "get_products":
         logger.info(f"Running get_products tool via SSE")
         # Call the products function to get real data
-        result = await products(PRODUCTS_API)
-        if result:
+        result = await products(PRODUCTS_API_URL)
+        if result is not None:
             logger.info(f"Returning real product data via SSE: {str(result)[:100]}...")
             yield f"data: {json.dumps({'result': result})}\n\n"
         else:
@@ -83,7 +83,45 @@ async def run_tool(request: Request) -> StreamingResponse:
         media_type="text/event-stream"
     )
 
+@app.get("/products")
+async def get_products():
+    """Get a list of products."""
+    try:
+        # Fetch products from the external API
+        async with httpx.AsyncClient() as client:
+            response = await client.get(PRODUCTS_API_URL)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Handle both dictionary with "products" key and direct list of products
+            if isinstance(data, dict) and "products" in data:
+                products = data["products"]
+            elif isinstance(data, list):
+                products = data
+            else:
+                products = []
+                logger.warning(f"Unexpected response format: {type(data)}")
+            
+            # Format the response in a standardized way
+            formatted_content = "Here are some products you might be interested in:\n\n"
+            for product in products[:5]:  # Limit to 5 products
+                formatted_content += f"{product['product_name']}\t"
+                formatted_content += f"${product['brand_name']}\n"
+            
+            return {
+                "raw_data": products[:10],  # Limit to 10 products in raw data
+                "formatted_content": formatted_content,
+                "metadata": {
+                    "count": len(products),
+                    "type": "products",
+                    "source": PRODUCTS_API_URL
+                }
+            }
+    except Exception as e:
+        logger.error(f"Error fetching products: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching products: {str(e)}")
+
 if __name__ == "__main__":
     logger.info(f"Starting Product Server with SSE support on {SERVER_HOST}:{SERVER_PORT}")
-    logger.info(f"Will fetch products from {PRODUCTS_API}")
+    logger.info(f"Will fetch products from {PRODUCTS_API_URL}")
     uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)

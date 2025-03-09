@@ -1,0 +1,67 @@
+2025-03-09 16:43:28,376 - mcp-host - INFO - Added product tool from http://localhost:5001
+2025-03-09 16:43:28,376 - mcp-host - INFO - Added analytics tool from http://localhost:5002
+2025-03-09 16:43:28,376 - mcp-host - INFO - Added eagle feed tool from http://localhost:5003
+2025-03-09 16:43:28,376 - mcp-host - INFO - Discovered 3 tools
+2025-03-09 16:43:28,376 - mcp-host - INFO - Tool: get_products - Get information about available products
+2025-03-09 16:43:28,376 - mcp-host - INFO - Tool: get_analytics - Get analytics data and metrics
+2025-03-09 16:43:28,376 - mcp-host - INFO - Tool: get_eagle_feeds - Get information about eagle live feeds and webcams
+2025-03-09 16:43:28,379 - mcp-host - INFO - Started client from ../mcp-client.py
+2025-03-09 16:43:28,380 - mcp-host - INFO - Starting MCP Host on port 8765
+2025-03-09 16:43:28,387 - websockets.server - INFO - server listening on 127.0.0.1:8765
+2025-03-09 16:43:28,387 - websockets.server - INFO - server listening on [::1]:8765
+/Users/abhisheksinghal/mcp/.venv/bin/python: can't open file '/Users/abhisheksinghal/mcp/../mcp-client.py': [Errno 2] No such file or directory
+2025-03-09 16:43:29,017 - websockets.server - INFO - connection rejected (400 Bad Request)
+2025-03-09 16:43:29,018 - websockets.server - INFO - connection closed
+2025-03-09 16:43:29,577 - websockets.server - INFO - connection open
+2025-03-09 16:43:29,578 - mcp-host - INFO - New client connected: 4372233616
+2025-03-09 16:43:34,068 - mcp-host - INFO - Received message from client 4372233616: get feeds...
+
+=== TOOL SELECTION PROMPT ===
+
+            Based on the user's message, determine if any of the following tools should be used:
+            
+            - get_products: Get information about available products
+- get_analytics: Get analytics data and metrics
+- get_eagle_feeds: Get information about eagle live feeds and webcams
+            
+            User message: "get feeds"
+            
+            If a tool should be used, respond with the tool name only. If no tool is appropriate, respond with "none".
+            
+=============================
+
+2025-03-09 16:43:34,068 - mcp-host - INFO - Querying Gemini API with message: 
+            Based on the user's message, determin...
+2025-03-09 16:43:34,069 - mcp-host - INFO - Sending request to Gemini API with 1 messages
+2025-03-09 16:43:34,551 - mcp-host - INFO - Received response from Gemini API with status code: 200
+2025-03-09 16:43:34,551 - mcp-host - INFO - Gemini response: get_eagle_feeds
+...
+
+=== TOOL DECISION ===
+Raw response: get_eagle_feeds
+========================
+
+2025-03-09 16:43:34,554 - mcp-host - INFO - Tool decision: get_eagle_feeds
+Selected tool: get_eagle_feeds
+2025-03-09 16:43:34,555 - mcp-host - INFO - Using tool: get_eagle_feeds from http://localhost:5003/eagle-feeds
+
+=== EXECUTING TOOL ===
+Tool: get_eagle_feeds
+URL: http://localhost:5003/eagle-feeds
+========================
+
+2025-03-09 16:43:34,605 - httpx - INFO - HTTP Request: GET http://localhost:5003/eagle-feeds "HTTP/1.1 200 OK"
+Response status: 200
+
+=== TOOL RESULT (Standardized) ===
+Here are some eagle live feeds you might be interested in:
+
+Big Bear Valley, California**
+https://www.friendsofbigbearvalley.org/eagle-cam/
+This nest is home to the famous bald eagle pair Jackie and S...
+====================
+
+2025-03-09 16:43:34,605 - mcp-host - INFO - Sending tool response to client 4372233616
+2025-03-09 16:43:37,942 - mcp-host - INFO - Client 4372233616 disconnected: 1006 
+2025-03-09 16:43:37,943 - mcp-host - INFO - Client 4372233616 connection closed
+2025-03-09 16:43:37,943 - websockets.server - INFO - connection closed

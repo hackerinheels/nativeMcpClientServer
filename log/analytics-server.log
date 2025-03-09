@@ -1,0 +1,9 @@
+2025-03-09 16:43:28,319 - analytics-server - INFO - Starting Analytics Server with SSE support on localhost:5002
+2025-03-09 16:43:28,319 - analytics-server - INFO - Will fetch analytics from http://localhost:5088/api/analytics
+INFO:     Started server process [5071]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('::1', 500INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [4769]

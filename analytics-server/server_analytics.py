@@ -6,7 +6,7 @@ import asyncio
 from typing import Any, List, Dict
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import StreamingResponse
 import uvicorn
 
@@ -116,6 +116,41 @@ async def run_tool(request: Request) -> StreamingResponse:
         sse_generator(tool_name, parameters),
         media_type="text/event-stream"
     )
+
+@app.get("/analytics")
+async def get_analytics():
+    """Get analytics data."""
+    try:
+        # Generate some mock analytics data
+        analytics_data = {
+            "total_users": 12543,
+            "active_users": 8721,
+            "new_users_today": 342,
+            "page_views": 45678,
+            "conversion_rate": "3.2%",
+            "average_session_duration": "4m 32s",
+            "bounce_rate": "28.5%"
+        }
+        
+        # Format the response in a standardized way
+        formatted_content = "Here are the latest analytics metrics:\n\n"
+        for metric, value in analytics_data.items():
+            # Format the metric name for better readability
+            formatted_metric = metric.replace("_", " ").title()
+            formatted_content += f"📊 **{formatted_metric}**: {value}\n"
+        
+        return {
+            "raw_data": analytics_data,
+            "formatted_content": formatted_content,
+            "metadata": {
+                "count": len(analytics_data),
+                "type": "analytics",
+                "period": "daily"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error generating analytics data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating analytics data: {str(e)}")
 
 if __name__ == "__main__":
     logger.info(f"Starting Analytics Server with SSE support on {SERVER_HOST}:{SERVER_PORT}")

@@ -1,0 +1,19 @@
+# Tool Server Discovery
+# List of MCP tool servers that the host should discover and use
+tool_servers:
+  - name: product-server
+    url: http://localhost:5001
+    path: /products
+    description: "Provides access to product information"
+  - name: analytics-server
+    url: http://localhost:5002
+    path: /analytics
+    description: "Provides analytics data and processing"
+  - name: eagle-feed-server
+    url: http://localhost:5003
+    path: /eagle-feeds
+    description: "Provides information about eagle live feeds"
+
+# Example: To add more tool servers in the future, just add their URLs:
+#  - url: "http://localhost:5002"  # Analytics Server 
+#    path: "analytics-server/server_analytics.py" 

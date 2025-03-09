@@ -1,0 +1,9 @@
+2025-03-09 16:43:28,312 - product-server - INFO - Starting Product Server with SSE support on localhost:5001
+2025-03-09 16:43:28,312 - product-server - INFO - Will fetch products from http://localhost:5087/api/products
+INFO:     Started server process [5068]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('::1', 500INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [4759]
